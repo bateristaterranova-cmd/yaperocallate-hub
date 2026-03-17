@@ -1,0 +1,193 @@
+:root {
+    --bg: #ececec; /* Gris muy claro / blanco sucio */
+    --fg: #050505; /* Negro intenso */
+    --font-serif: "Bodoni Moda", serif;
+    --font-mono: "Space Mono", monospace;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-mono);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Filtro de ruido estático pronunciado */
+.noise-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.18;
+    background: url('data:image/svg+xml;charset=utf-8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
+}
+
+.container {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Layout - Menú Lateral Fijo */
+.sidebar {
+    width: 320px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    border-right: 3px solid var(--fg);
+    padding: 3rem 2rem;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background-color: var(--bg); /* Aseguramos fondo sobre el grid si se solapa en scroll */
+    z-index: 10;
+}
+
+.menu {
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+}
+
+.menu-link {
+    text-decoration: none;
+    color: var(--fg);
+    display: inline-flex;
+    flex-direction: column;
+    padding: 0.5rem;
+    /* Estilo grunge / abrupto: borde y transición cero */
+    border: 2px solid transparent;
+}
+
+.menu-link:hover {
+    background-color: var(--fg);
+    color: var(--bg);
+    /* Inversión abrupta de colores (sin transition) */
+}
+
+.menu-link .label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid currentColor;
+    padding-bottom: 0.2rem;
+    align-self: flex-start;
+}
+
+.menu-link .text {
+    font-size: 1.4rem;
+    font-weight: 700;
+    line-height: 1.2;
+    word-spacing: -2px;
+}
+
+/* Layout - Área de Contenido */
+.content {
+    margin-left: 320px; /* Igual al ancho del sidebar */
+    padding: 3rem;
+    width: calc(100% - 320px);
+    box-sizing: border-box;
+}
+
+.main-title {
+    font-family: var(--font-serif);
+    font-size: clamp(4rem, 9vw, 12rem);
+    font-weight: 900;
+    margin: 0 0 4rem 0;
+    line-height: 0.85;
+    letter-spacing: -0.06em;
+    text-transform: uppercase;
+    word-break: break-word;
+    border-bottom: 5px solid var(--fg);
+    padding-bottom: 1rem;
+}
+
+/* Masonry Grid */
+.grid {
+    column-count: 3;
+    column-gap: 2rem;
+}
+
+.grid-item {
+    break-inside: avoid;
+    margin-bottom: 2rem;
+    border: 3px solid var(--fg);
+    background: var(--fg);
+    position: relative;
+    /* Efecto brutalista sutil */
+    box-shadow: 6px 6px 0px var(--fg);
+}
+
+.grid-item img {
+    width: 100%;
+    display: block;
+    /* Para darle el toque monocromático que se rompe con hover o un estilo dark */
+    filter: grayscale(100%) contrast(1.2);
+    transition: filter 0.1s steps(2);
+}
+
+.grid-item:hover img {
+    filter: grayscale(0%) contrast(1.1);
+}
+
+.grid-item .badge {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: var(--fg);
+    color: var(--bg);
+    padding: 0.5rem;
+    box-sizing: border-box;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+}
+
+/* Responsive */
+@media (max-width: 1100px) {
+    .grid {
+        column-count: 2;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+    }
+    
+    .sidebar {
+        width: 100%;
+        position: relative;
+        height: auto;
+        border-right: none;
+        border-bottom: 3px solid var(--fg);
+        padding: 2rem 1.5rem;
+    }
+
+    .menu {
+        gap: 1.5rem;
+    }
+    
+    .content {
+        margin-left: 0;
+        width: 100%;
+        padding: 2rem 1.5rem;
+    }
+    
+    .grid {
+        column-count: 1;
+    }
+
+    .main-title {
+        border-bottom: 3px solid var(--fg);
+        margin-bottom: 2rem;
+    }
+}
