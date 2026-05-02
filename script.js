@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Imgenes de placeholder abstractas y con vibratividad para contraste al hacer hover
     const items = [
         { title: 'N 8 N', img: 'n8n_logo.svg', link: '#n8n', id: 'card-n8n' },
-        { title: 'C O O L I F Y', img: 'https://coolify.io/logo.png', link: 'https://control.yaperocallate.com' },
+        { title: 'C O O L I F Y', img: 'https://images.unsplash.com/photo-1620288627223-53302f4e8c74?q=80&w=600&h=450&fit=crop', link: 'https://control.yaperocallate.com' },
         { title: 'F 0 R 0', img: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=600&h=450&fit=crop', link: 'https://foro.yaperocallate.com' },
         { title: 'P R 0 Y E C T 0 S', img: 'https://images.unsplash.com/photo-1604871000636-074fa5117945?q=80&w=600&h=900&fit=crop', link: 'https://proyectos.yaperocallate.com' },
         { title: 'V 1 D E O 5', img: 'https://images.unsplash.com/photo-1506157786151-b8491531f063?q=80&w=600&h=500&fit=crop', link: 'https://videos.yaperocallate.com' },
