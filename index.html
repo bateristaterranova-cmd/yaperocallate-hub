@@ -9,6 +9,40 @@
     <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <link rel="icon" href="sharingan.svg" type="image/svg+xml">
+    
+    <!-- Tailwind CSS (CDN for quick setup) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            corePlugins: { preflight: false },
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        background: '#000000',
+                        foreground: '#ffffff',
+                        muted: 'hsl(0 0% 65%)',
+                        card: 'hsl(0 0% 5%)',
+                        border: 'hsl(0 0% 20%)',
+                        primary: '#3b82f6',
+                        success: '#10b981',
+                        danger: '#ef4444',
+                        warning: '#f59e0b'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Instrument Serif', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Instrument+Serif:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+    <!-- Heroicons / Lucide -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="noise-overlay"></div>
@@ -49,12 +83,169 @@
                 </div>
             </div>
 
-            <div id="n8n-section" style="display: none;">
-                <div class="n8n-header">
-                    <h2>N8N WORKSPACE</h2>
-                    <p>Select a skill or workflow to continue.</p>
+            <div id="n8n-section" style="display: none;" class="dark">
+                <!-- Background Effects -->
+                <div class="fixed inset-0 z-0 pointer-events-none" style="position: absolute;">
+                    <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 rounded-full blur-[120px]"></div>
+                    <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600/20 rounded-full blur-[120px]"></div>
                 </div>
-                <!-- Future N8N content goes here -->
+
+                <div class="relative z-10 p-6 lg:p-10 max-w-7xl mx-auto space-y-8" style="background: transparent; color: white;">
+                    <!-- Header & Search -->
+                    <header class="flex flex-col md:flex-row justify-between items-center gap-4 liquid-glass p-6 rounded-2xl shadow-xl">
+                        <div class="flex items-center gap-3">
+                            <i data-lucide="workflow" class="text-primary w-8 h-8"></i>
+                            <h1 class="text-2xl font-bold bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">n8n <span class="font-serif italic font-normal">Monitor</span></h1>
+                        </div>
+                        
+                        <div class="relative w-full md:w-96">
+                            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
+                            <input type="text" id="searchInput" placeholder="Buscar flujos, estados, IDs..." 
+                                class="w-full bg-slate-900/50 border border-border text-slate-200 text-sm rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent block pl-10 p-2.5 transition-all outline-none" style="border: 1px solid hsl(0 0% 20%); background: rgba(15, 23, 42, 0.5);">
+                        </div>
+                    </header>
+
+                    <!-- KPI Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); display: grid;">
+                        <!-- Total -->
+                        <div class="kpi-card liquid-glass p-6 rounded-2xl shadow-lg flex items-center justify-between group">
+                            <div>
+                                <p class="text-slate-400 text-sm font-medium mb-1" style="color: #94a3b8;">Total Ejercuciones</p>
+                                <h3 class="text-3xl font-bold text-white transition-all group-hover:text-primary" id="kpiTotal">0</h3>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-slate-800 flex items-center justify-center border border-slate-700" style="background: #1e293b; border-color: #334155;">
+                                <i data-lucide="activity" class="text-primary w-6 h-6"></i>
+                            </div>
+                        </div>
+                        
+                        <!-- Exitosas -->
+                        <div class="kpi-card liquid-glass p-6 rounded-2xl shadow-lg flex items-center justify-between group">
+                            <div>
+                                <p class="text-slate-400 text-sm font-medium mb-1" style="color: #94a3b8;">Exitosas</p>
+                                <h3 class="text-3xl font-bold text-white transition-all group-hover:text-success" id="kpiSuccess">0</h3>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-slate-800 flex items-center justify-center border border-slate-700" style="background: #1e293b; border-color: #334155;">
+                                <i data-lucide="check-circle-2" class="text-success w-6 h-6"></i>
+                            </div>
+                        </div>
+
+                        <!-- Fallidas -->
+                        <div class="kpi-card liquid-glass p-6 rounded-2xl shadow-lg flex items-center justify-between group">
+                            <div>
+                                <p class="text-slate-400 text-sm font-medium mb-1" style="color: #94a3b8;">Fallidas</p>
+                                <h3 class="text-3xl font-bold text-white transition-all group-hover:text-danger" id="kpiFailed">0</h3>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-slate-800 flex items-center justify-center border border-slate-700" style="background: #1e293b; border-color: #334155;">
+                                <i data-lucide="x-circle" class="text-danger w-6 h-6"></i>
+                            </div>
+                        </div>
+
+                        <!-- En proceso -->
+                        <div class="kpi-card liquid-glass p-6 rounded-2xl shadow-lg flex items-center justify-between group">
+                            <div>
+                                <p class="text-slate-400 text-sm font-medium mb-1" style="color: #94a3b8;">En Proceso</p>
+                                <h3 class="text-3xl font-bold text-white transition-all group-hover:text-warning" id="kpiRunning">0</h3>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-slate-800 flex items-center justify-center border border-slate-700" style="background: #1e293b; border-color: #334155;">
+                                <i data-lucide="loader-2" class="text-warning w-6 h-6 animate-spin-slow"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Content Area -->
+                    <div class="liquid-glass rounded-2xl shadow-xl overflow-hidden">
+                        <!-- Tabs Navigation -->
+                        <div class="border-b border-border px-6 pt-4" style="border-bottom: 1px solid hsl(0 0% 20%);">
+                            <nav class="flex space-x-8" aria-label="Tabs" id="tabsNav" style="display: flex; gap: 2rem;">
+                                <button class="tab-btn active-tab border-primary text-primary whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2" data-target="tab-executions" style="border-bottom: 2px solid #3b82f6; background: transparent; color: #3b82f6;">
+                                    <i data-lucide="list" class="w-4 h-4"></i> Ejecuciones
+                                </button>
+                                <button class="tab-btn border-transparent text-slate-400 hover:text-slate-300 hover:border-slate-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 transition-all" data-target="tab-errors" style="background: transparent; border: none; color: #94a3b8;">
+                                    <i data-lucide="alert-circle" class="w-4 h-4"></i> Errores
+                                </button>
+                                <button class="tab-btn border-transparent text-slate-400 hover:text-slate-300 hover:border-slate-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 transition-all" data-target="tab-api" style="background: transparent; border: none; color: #94a3b8;">
+                                    <i data-lucide="zap" class="w-4 h-4"></i> Consumo API
+                                </button>
+                            </nav>
+                        </div>
+
+                        <!-- Tabs Content -->
+                        <div class="p-0">
+                            <!-- Executions Tab -->
+                            <div id="tab-executions" class="tab-content active transition-opacity duration-300 overflow-x-auto">
+                                <!-- Filtros de Categoría -->
+                                <div class="px-6 py-4 border-b border-border flex flex-wrap gap-2" id="categoryFilters" style="border-bottom: 1px solid hsl(0 0% 20%);">
+                                    <!-- Botones Dinámicos se inyectarán aquí vía JS -->
+                                </div>
+
+                                <table class="w-full text-left border-collapse" style="width: 100%; border-collapse: collapse;">
+                                    <thead>
+                                        <tr class="border-b border-border bg-slate-900/30 text-xs uppercase tracking-wider text-slate-400" style="border-bottom: 1px solid hsl(0 0% 20%); color: #94a3b8; background: rgba(15, 23, 42, 0.3);">
+                                            <th class="p-4 font-medium" style="padding: 1rem;">ID</th>
+                                            <th class="p-4 font-medium" style="padding: 1rem;">Nombre del Flujo</th>
+                                            <th class="p-4 font-medium" style="padding: 1rem;">Fecha/Hora</th>
+                                            <th class="p-4 font-medium" style="padding: 1rem;">Estado</th>
+                                            <th class="p-4 font-medium text-right" style="padding: 1rem; text-align: right;">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="executionsTableBody" class="divide-y divide-border text-sm" style="font-size: 0.875rem;">
+                                        <!-- Rows will be populated via JS -->
+                                    </tbody>
+                                </table>
+                                
+                                <!-- Loading State Array -->
+                                <div id="loadingState" class="p-10 flex flex-col items-center justify-center text-slate-400" style="padding: 2.5rem; text-align: center; color: #94a3b8;">
+                                    <i data-lucide="loader-2" class="w-8 h-8 animate-spin text-primary mb-3" style="animation: spin 1s linear infinite;"></i>
+                                    <p>Cargando datos de n8n...</p>
+                                </div>
+
+                                <!-- Empty State -->
+                                <div id="emptyState" class="hidden p-10 flex flex-col items-center justify-center text-slate-400" style="display: none; padding: 2.5rem; text-align: center; color: #94a3b8;">
+                                    <i data-lucide="search-x" class="w-10 h-10 mb-3 text-slate-500"></i>
+                                    <p>No se encontraron resultados.</p>
+                                </div>
+                            </div>
+
+                            <!-- Errors Tab -->
+                            <div id="tab-errors" class="tab-content hidden opacity-0 transition-opacity duration-300 p-6 text-center text-slate-400" style="padding: 1.5rem; text-align: center; color: #94a3b8;">
+                                <i data-lucide="shield-alert" class="w-12 h-12 mx-auto mb-4 text-slate-500"></i>
+                                <h3 class="text-lg font-medium text-slate-300 mb-2">Vista de Errores</h3>
+                                <p>Filtro rápido mostrando únicamente las ejecuciones con estado fallido.</p>
+                                <div class="mt-6 border border-border rounded-xl overflow-hidden text-left" style="margin-top: 1.5rem; border: 1px solid hsl(0 0% 20%); border-radius: 0.75rem; text-align: left;">
+                                    <table class="w-full" style="width: 100%;">
+                                         <tbody id="errorsTableBody" class="divide-y divide-border text-sm" style="font-size: 0.875rem;">
+                                            <!-- Errors will be populated here -->
+                                         </tbody>
+                                    </table>
+                                    <div id="noErrorsState" class="p-8 text-center hidden" style="display: none; padding: 2rem; text-align: center;">
+                                        <p class="text-success flex items-center justify-center gap-2"><i data-lucide="check-circle"></i> No hay errores recientes.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- API Consumption Tab (Charts) -->
+                            <div id="tab-api" class="tab-content hidden opacity-0 transition-opacity duration-300 p-6" style="padding: 1.5rem;">
+                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 py-6" style="display: grid; gap: 2rem; padding: 1.5rem 0; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+                                    <!-- Doughnut Chart: Exito vs Error -->
+                                    <div class="liquid-glass p-6 rounded-2xl flex flex-col items-center">
+                                        <h3 class="text-lg font-medium text-slate-300 mb-4 w-full text-left">Estado (últimas 50)</h3>
+                                        <div class="relative w-64 h-64" style="width: 16rem; height: 16rem; position: relative;">
+                                            <canvas id="statusChart"></canvas>
+                                        </div>
+                                    </div>
+
+                                    <!-- Bar Chart: Volumen por Hora -->
+                                    <div class="bg-slate-900/50 p-6 rounded-2xl border border-slate-700/50 flex flex-col items-center" style="background: rgba(15, 23, 42, 0.5); border: 1px solid rgba(51, 65, 85, 0.5); border-radius: 1rem; padding: 1.5rem;">
+                                        <h3 class="text-lg font-medium text-slate-300 mb-4 w-full text-left">Ejecuciones por Hora</h3>
+                                        <div class="relative w-full h-64" style="width: 100%; height: 16rem; position: relative;">
+                                            <canvas id="hourlyChart"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </main>
     </div>

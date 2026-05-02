@@ -210,28 +210,78 @@ body {
     animation: fadeIn 0.4s ease forwards;
 }
 
-.n8n-header {
-    border: 3px solid var(--fg);
-    background: var(--bg);
-    padding: 2rem;
-    box-shadow: 6px 6px 0px var(--fg);
-    margin-bottom: 2rem;
+/* Custom Scrollbar for N8N (dark mode look) */
+#n8n-section ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
 }
 
-.n8n-header h2 {
-    margin: 0 0 1rem 0;
-    font-size: 2.5rem;
-    text-transform: uppercase;
+#n8n-section ::-webkit-scrollbar-track {
+    background: #0f172a; 
 }
 
-.n8n-header p {
-    margin: 0;
-    font-size: 1.2rem;
+#n8n-section ::-webkit-scrollbar-thumb {
+    background: #334155; 
+    border-radius: 4px;
+}
+
+#n8n-section ::-webkit-scrollbar-thumb:hover {
+    background: #475569; 
+}
+
+#n8n-section .kpi-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#n8n-section .kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+}
+
+#n8n-section .tab-content {
+    display: none;
+}
+
+#n8n-section .tab-content.active {
+    display: block;
+}
+
+#n8n-section .animate-spin-slow {
+    animation: spin 3s linear infinite;
 }
 
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
+}
+
+#n8n-section .row-enter {
+    animation: fadeIn 0.4s ease forwards;
+}
+
+#n8n-section .liquid-glass {
+  background: rgba(255, 255, 255, 0.01);
+  background-blend-mode: luminosity;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: none;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+#n8n-section .liquid-glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.4px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.15) 20%, rgba(255,255,255,0) 40%, rgba(255,255,255,0) 60%, rgba(255,255,255,0.15) 80%, rgba(255,255,255,0.45) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
 }
 
 /* Responsive */
