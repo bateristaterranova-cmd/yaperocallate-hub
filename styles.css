@@ -123,6 +123,7 @@ body {
     padding: 0;
     margin: 0;
     border: none;
+    display: none;
 }
 
 .sidebar.collapsed .menu-link {
@@ -130,7 +131,18 @@ body {
     justify-content: center;
 }
 
-.sidebar.collapsed .menu-link::after {
+.collapsed-icon {
+    display: none;
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+}
+
+.sidebar.collapsed .menu-link .collapsed-icon {
+    display: block;
+}
+
+.sidebar.collapsed .menu-link:not(.has-icon)::after {
     content: "↘";
     font-size: 1.5rem;
     font-weight: bold;

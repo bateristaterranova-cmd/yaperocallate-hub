@@ -21,35 +21,44 @@ document.addEventListener('DOMContentLoaded', () => {
         n8nSection.style.display = 'block';
     });
 
-    // Click on main title to go back to home
-    mainTitle.style.cursor = 'pointer';
-    mainTitle.addEventListener('click', () => {
+    const navHome = document.getElementById('nav-home');
+
+    // Click on home nav link to go back to home
+    navHome.addEventListener('click', (e) => {
+        e.preventDefault();
         n8nSection.style.display = 'none';
         mainView.style.display = 'block';
     });
 
     // Imgenes de placeholder abstractas y con vibratividad para contraste al hacer hover
     const items = [
-        { title: 'N 8 N', img: 'n8n_logo.svg' },
-        { title: 'F 0 R 0', img: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=600&h=450&fit=crop' },
-        { title: 'P R 0 Y E C T 0 S', img: 'https://images.unsplash.com/photo-1604871000636-074fa5117945?q=80&w=600&h=900&fit=crop' },
-        { title: 'V 1 D E O 5', img: 'https://images.unsplash.com/photo-1506157786151-b8491531f063?q=80&w=600&h=500&fit=crop' },
-        { title: 'L 1 N K 5', img: 'https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?q=80&w=600&h=700&fit=crop' }
+        { title: 'N 8 N', img: 'n8n_logo.svg', link: '#n8n', id: 'card-n8n' },
+        { title: 'C O O L I F Y', img: 'https://coolify.io/logo.png', link: 'https://control.yaperocallate.com' },
+        { title: 'F 0 R 0', img: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=600&h=450&fit=crop', link: 'https://foro.yaperocallate.com' },
+        { title: 'P R 0 Y E C T 0 S', img: 'https://images.unsplash.com/photo-1604871000636-074fa5117945?q=80&w=600&h=900&fit=crop', link: 'https://proyectos.yaperocallate.com' },
+        { title: 'V 1 D E O 5', img: 'https://images.unsplash.com/photo-1506157786151-b8491531f063?q=80&w=600&h=500&fit=crop', link: 'https://videos.yaperocallate.com' },
+        { title: 'L 1 N K 5', img: 'https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?q=80&w=600&h=700&fit=crop', link: 'https://links.yaperocallate.com' }
     ];
 
     items.forEach(item => {
-        const itemDiv = document.createElement('div');
-        itemDiv.className = 'grid-item';
-        
-        // If it's n8n svg, don't apply grayscale so strongly or do it differently if wanted,
-        // but since we are replacing the previous APPS, we keep the HTML.
-        itemDiv.innerHTML = `
-            <img src="${item.img}" alt="${item.title}" loading="lazy" ${item.img.includes('svg') ? 'style="background: #050505; padding: 2rem; box-sizing: border-box;"' : ''}>
-            <div class="badge">${item.title}</div>
+        const isExternal = item.link && item.link.startsWith('http');
+        const itemHTML = `
+            <a href="${item.link || '#'}" ${isExternal ? 'target="_blank"' : ''} class="grid-item block" ${item.id ? `id="${item.id}"` : ''} style="text-decoration: none;">
+                <img src="${item.img}" alt="${item.title}" loading="lazy" ${item.img.includes('svg') || item.img.includes('png') ? 'style="background: #050505; padding: 2rem; box-sizing: border-box; object-fit: contain;"' : ''}>
+                <div class="badge">${item.title}</div>
+            </a>
         `;
-        
-        grid.appendChild(itemDiv);
+        grid.insertAdjacentHTML('beforeend', itemHTML);
     });
+
+    const cardN8n = document.getElementById('card-n8n');
+    if (cardN8n) {
+        cardN8n.addEventListener('click', (e) => {
+            e.preventDefault();
+            mainView.style.display = 'none';
+            n8nSection.style.display = 'block';
+        });
+    }
 });
 
 /**
@@ -250,6 +259,8 @@ async function fetchExecutions() {
         }
     } catch (error) {
         console.error('Error obteniendo ejecuciones de n8n:', error);
+        loadingState.innerHTML = `<div class="text-danger flex flex-col items-center gap-2" style="color: #ef4444;"><i data-lucide="alert-triangle" class="w-8 h-8"></i><span class="font-bold">Error de conexión con n8n</span><span class="text-xs text-slate-400">Verifica que n8n tenga CORS habilitado y la API Key sea correcta.</span></div>`;
+        lucide.createIcons();
     }
 }
 
