@@ -155,6 +155,7 @@ body {
     width: calc(100% - 320px);
     box-sizing: border-box;
     transition: margin-left 0.3s cubic-bezier(0.25, 1, 0.5, 1), width 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    max-width: none;
 }
 
 .sidebar.collapsed ~ .content {
@@ -179,6 +180,7 @@ body {
 .masonry-grid {
     column-count: 3;
     column-gap: 2rem;
+    width: 100%;
 }
 
 .grid-item {

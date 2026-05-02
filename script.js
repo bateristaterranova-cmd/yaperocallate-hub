@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
  */
 
 const N8N_BASE_URL = 'https://n8n.yaperocallate.com'; 
-const API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjYTRkNTE5Zi02OWE2LTQwNGYtYTllNi04MGM0Y2E3MTdlOTAiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwianRpIjoiZDQ4YWMwZTEtYzVmOC00ZThjLTk4YTgtM2FkY2JjMGMxYWY1IiwiaWF0IjoxNzc3NzA5MzgzfQ.ZwJGBzyyZayi3wRA4Rke1JHxPSZWnqjt93E7R5e3pFA';
+const API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjYTRkNTE5Zi02OWE2LTQwNGYtYTllNi04MGM0Y2E3MTdlOTAiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwianRpIjoiYzRkN2JkNWEtNTAwNy00NzI3LTg0ZDEtYThkMDA4MGY5ODlhIiwiaWF0IjoxNzc3NzQ1OTI4fQ.CgpSeOhS_EU9Zzz9tUUgqMIlWttQsXp0O1oKt6oojgo';
 
 /**
  * --------------------------------------------------------------------------
