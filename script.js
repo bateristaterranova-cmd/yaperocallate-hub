@@ -1,4 +1,197 @@
 document.addEventListener('DOMContentLoaded', () => {
+    /**
+     * --------------------------------------------------------------------------
+     * AUTHENTICATION SYSTEM (Mock usando localStorage)
+     * --------------------------------------------------------------------------
+     */
+    const initAuth = () => {
+        const authOverlay = document.getElementById('auth-overlay');
+        const loginView = document.getElementById('login-view');
+        const registerView = document.getElementById('register-view');
+        const pendingView = document.getElementById('pending-view');
+        const adminView = document.getElementById('admin-view');
+        
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const btnShowRegister = document.getElementById('btn-show-register');
+        const btnShowLogin = document.getElementById('btn-show-login');
+        const btnPendingBack = document.getElementById('btn-pending-back');
+        const btnLogoutSidebar = document.getElementById('nav-logout-sidebar');
+        const btnLogoutAdmin = document.getElementById('btn-logout');
+        const navAdmin = document.getElementById('nav-admin');
+        const btnAdminContinue = document.getElementById('btn-admin-continue');
+        
+        // Initialize admin account if not exists
+        let accounts = JSON.parse(localStorage.getItem('accounts')) || [];
+        if (!accounts.find(a => a.email === 'admin')) {
+            accounts.push({ email: 'admin', password: 'admin', status: 'admin', reason: 'System Admin' });
+            localStorage.setItem('accounts', JSON.stringify(accounts));
+        }
+
+        const showView = (viewElement) => {
+            [loginView, registerView, pendingView, adminView].forEach(el => el.classList.add('hidden'));
+            viewElement.classList.remove('hidden');
+        };
+
+        const updateUIState = () => {
+            const status = localStorage.getItem('auth_status');
+            if (status === 'admin') {
+                authOverlay.classList.add('opacity-0', 'pointer-events-none');
+                setTimeout(() => authOverlay.classList.add('hidden'), 500);
+                navAdmin.classList.remove('hidden');
+            } else if (status === 'approved') {
+                authOverlay.classList.add('opacity-0', 'pointer-events-none');
+                setTimeout(() => authOverlay.classList.add('hidden'), 500);
+                navAdmin.classList.add('hidden');
+            } else if (status === 'pending') {
+                authOverlay.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
+                showView(pendingView);
+                navAdmin.classList.add('hidden');
+            } else {
+                authOverlay.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
+                showView(loginView);
+                navAdmin.classList.add('hidden');
+            }
+        };
+
+        // Initial check
+        updateUIState();
+
+        // Login logic
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value.trim();
+            const pass = document.getElementById('login-password').value.trim();
+            const errorEl = document.getElementById('login-error');
+            
+            accounts = JSON.parse(localStorage.getItem('accounts')) || [];
+            const user = accounts.find(a => a.email === email && a.password === pass);
+            
+            if (user) {
+                if (user.status === 'pending') {
+                    localStorage.setItem('auth_status', 'pending');
+                    localStorage.setItem('current_user', email);
+                    updateUIState();
+                } else {
+                    localStorage.setItem('auth_status', user.status);
+                    localStorage.setItem('current_user', email);
+                    errorEl.classList.add('hidden');
+                    updateUIState();
+                }
+            } else {
+                errorEl.textContent = 'Credenciales incorrectas.';
+                errorEl.classList.remove('hidden');
+            }
+        });
+
+        // Register logic
+        registerForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('register-email').value.trim();
+            const pass = document.getElementById('register-password').value.trim();
+            const reason = document.getElementById('register-reason').value.trim();
+            const errorEl = document.getElementById('register-error');
+            
+            accounts = JSON.parse(localStorage.getItem('accounts')) || [];
+            if (accounts.find(a => a.email === email)) {
+                errorEl.textContent = 'El usuario ya existe.';
+                errorEl.classList.remove('hidden');
+            } else {
+                accounts.push({ email, password: pass, reason, status: 'pending' });
+                localStorage.setItem('accounts', JSON.stringify(accounts));
+                localStorage.setItem('auth_status', 'pending');
+                localStorage.setItem('current_user', email);
+                updateUIState();
+            }
+        });
+
+        // Navigation buttons in auth overlay
+        btnShowRegister.addEventListener('click', (e) => { e.preventDefault(); showView(registerView); });
+        btnShowLogin.addEventListener('click', (e) => { e.preventDefault(); showView(loginView); });
+        btnPendingBack.addEventListener('click', (e) => { 
+            e.preventDefault(); 
+            localStorage.removeItem('auth_status'); 
+            localStorage.removeItem('current_user'); 
+            updateUIState(); 
+        });
+
+        // Logout
+        const logout = (e) => {
+            if(e) e.preventDefault();
+            localStorage.removeItem('auth_status');
+            localStorage.removeItem('current_user');
+            updateUIState();
+        };
+        if (btnLogoutSidebar) btnLogoutSidebar.addEventListener('click', logout);
+        if (btnLogoutAdmin) btnLogoutAdmin.addEventListener('click', logout);
+
+        // Admin view
+        if (navAdmin) {
+            navAdmin.addEventListener('click', (e) => {
+                e.preventDefault();
+                renderAdminRequests();
+                authOverlay.classList.remove('hidden');
+                setTimeout(() => {
+                    authOverlay.classList.remove('opacity-0', 'pointer-events-none');
+                    showView(adminView);
+                }, 10);
+            });
+        }
+
+        if (btnAdminContinue) {
+            btnAdminContinue.addEventListener('click', (e) => {
+                e.preventDefault();
+                updateUIState();
+            });
+        }
+
+        const renderAdminRequests = () => {
+            const container = document.getElementById('admin-requests');
+            accounts = JSON.parse(localStorage.getItem('accounts')) || [];
+            const pending = accounts.filter(a => a.status === 'pending');
+            
+            if (pending.length === 0) {
+                container.innerHTML = '<p class="text-xs font-mono opacity-60">No hay solicitudes pendientes.</p>';
+                return;
+            }
+
+            container.innerHTML = pending.map(user => `
+                <div class="border border-[var(--fg)] p-3 bg-black/5 text-xs font-mono mb-2">
+                    <p><strong>Usuario:</strong> ${user.email}</p>
+                    <p class="mt-1 opacity-80"><strong>Motivo:</strong> ${user.reason}</p>
+                    <div class="flex gap-2 mt-3">
+                        <button class="bg-success text-white px-3 py-1 hover:opacity-80 approve-btn border border-[var(--success)]" data-email="${user.email}" style="background-color: var(--success); border-color: var(--success); color: #fff;">Aprobar</button>
+                        <button class="bg-danger text-white px-3 py-1 hover:opacity-80 reject-btn border border-[var(--danger)]" data-email="${user.email}" style="background-color: var(--danger); border-color: var(--danger); color: #fff;">Rechazar</button>
+                    </div>
+                </div>
+            `).join('');
+
+            container.querySelectorAll('.approve-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const email = e.target.getAttribute('data-email');
+                    const accIndex = accounts.findIndex(a => a.email === email);
+                    if(accIndex > -1) {
+                        accounts[accIndex].status = 'approved';
+                        localStorage.setItem('accounts', JSON.stringify(accounts));
+                        renderAdminRequests();
+                    }
+                });
+            });
+
+            container.querySelectorAll('.reject-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const email = e.target.getAttribute('data-email');
+                    accounts = accounts.filter(a => a.email !== email);
+                    localStorage.setItem('accounts', JSON.stringify(accounts));
+                    renderAdminRequests();
+                });
+            });
+        };
+    };
+
+    // Initialize Auth
+    initAuth();
+
     const grid = document.getElementById('masonry-grid');
     const menuToggle = document.getElementById('menu-toggle');
     const sidebar = document.querySelector('.sidebar');
