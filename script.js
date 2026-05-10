@@ -1,10 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
     /**
      * --------------------------------------------------------------------------
-     * AUTHENTICATION SYSTEM (Mock usando localStorage)
+     * AUTHENTICATION SYSTEM (Supabase)
      * --------------------------------------------------------------------------
      */
-    const initAuth = () => {
+    const SUPABASE_URL = 'https://supabase.yaperocallate.com';
+    const SUPABASE_ANON_KEY = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTc3ODMyMDkyMCwiZXhwIjo0OTMzOTk0NTIwLCJyb2xlIjoiYW5vbiJ9.Z2L0-mUWwnrbcjS8V3LnLiwVbFLNhVBHEqrs_Gn4-6k';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const initAuth = async () => {
         const authOverlay = document.getElementById('auth-overlay');
         const loginView = document.getElementById('login-view');
         const registerView = document.getElementById('register-view');
@@ -20,137 +24,174 @@ document.addEventListener('DOMContentLoaded', () => {
         const btnLogoutAdmin = document.getElementById('btn-logout');
         const navAdmin = document.getElementById('nav-admin');
         const btnAdminContinue = document.getElementById('btn-admin-continue');
-        
-        // Initialize admin account if not exists
-        let accounts = JSON.parse(localStorage.getItem('accounts')) || [];
-        if (!accounts.find(a => a.email === 'admin')) {
-            accounts.push({ email: 'admin', password: 'admin', status: 'admin', reason: 'System Admin' });
-            localStorage.setItem('accounts', JSON.stringify(accounts));
-        }
 
         const showView = (viewElement) => {
             [loginView, registerView, pendingView, adminView].forEach(el => el.classList.add('hidden'));
             viewElement.classList.remove('hidden');
         };
 
-        const updateUIState = () => {
-            const status = localStorage.getItem('auth_status');
-            if (status === 'admin') {
-                authOverlay.classList.add('opacity-0', 'pointer-events-none');
-                setTimeout(() => authOverlay.classList.add('hidden'), 500);
-                navAdmin.classList.remove('hidden');
-            } else if (status === 'approved') {
-                authOverlay.classList.add('opacity-0', 'pointer-events-none');
-                setTimeout(() => authOverlay.classList.add('hidden'), 500);
+        const updateUIState = async (session) => {
+            if (!session) {
+                authOverlay.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
+                showView(loginView);
                 navAdmin.classList.add('hidden');
-            } else if (status === 'pending') {
+                return;
+            }
+
+            // We have a session, let's check the profile
+            const { data: profile, error } = await supabaseClient
+                .from('profiles')
+                .select('*')
+                .eq('id', session.user.id)
+                .single();
+
+            if (error || !profile) {
+                console.error("Error fetching profile", error);
+                // If no profile, they might have just registered or something went wrong. Assume pending.
                 authOverlay.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
                 showView(pendingView);
                 navAdmin.classList.add('hidden');
+                return;
+            }
+
+            if (profile.status === 'admin') {
+                authOverlay.classList.add('opacity-0', 'pointer-events-none');
+                setTimeout(() => authOverlay.classList.add('hidden'), 500);
+                navAdmin.classList.remove('hidden');
+            } else if (profile.status === 'approved') {
+                authOverlay.classList.add('opacity-0', 'pointer-events-none');
+                setTimeout(() => authOverlay.classList.add('hidden'), 500);
+                navAdmin.classList.add('hidden');
             } else {
+                // Pending or rejected
                 authOverlay.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
-                showView(loginView);
+                showView(pendingView);
                 navAdmin.classList.add('hidden');
             }
         };
 
         // Initial check
-        updateUIState();
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        await updateUIState(session);
+
+        supabaseClient.auth.onAuthStateChange(async (event, session) => {
+            if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
+                await updateUIState(session);
+            }
+        });
 
         // Login logic
-        loginForm.addEventListener('submit', (e) => {
+        loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('login-email').value.trim();
             const pass = document.getElementById('login-password').value.trim();
             const errorEl = document.getElementById('login-error');
             
-            accounts = JSON.parse(localStorage.getItem('accounts')) || [];
-            const user = accounts.find(a => a.email === email && a.password === pass);
-            
-            if (user) {
-                if (user.status === 'pending') {
-                    localStorage.setItem('auth_status', 'pending');
-                    localStorage.setItem('current_user', email);
-                    updateUIState();
-                } else {
-                    localStorage.setItem('auth_status', user.status);
-                    localStorage.setItem('current_user', email);
-                    errorEl.classList.add('hidden');
-                    updateUIState();
-                }
-            } else {
-                errorEl.textContent = 'Credenciales incorrectas.';
+            const btn = loginForm.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "Comprobando...";
+            btn.disabled = true;
+
+            const { error } = await supabaseClient.auth.signInWithPassword({
+                email: email,
+                password: pass,
+            });
+
+            if (error) {
+                errorEl.textContent = 'Credenciales incorrectas o cuenta no existe.';
                 errorEl.classList.remove('hidden');
+            } else {
+                errorEl.classList.add('hidden');
             }
+            btn.innerHTML = originalText;
+            btn.disabled = false;
         });
 
         // Register logic
-        registerForm.addEventListener('submit', (e) => {
+        registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('register-email').value.trim();
             const pass = document.getElementById('register-password').value.trim();
             const reason = document.getElementById('register-reason').value.trim();
             const errorEl = document.getElementById('register-error');
             
-            accounts = JSON.parse(localStorage.getItem('accounts')) || [];
-            if (accounts.find(a => a.email === email)) {
-                errorEl.textContent = 'El usuario ya existe.';
+            const btn = registerForm.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "Enviando solicitud...";
+            btn.disabled = true;
+
+            const { data, error } = await supabaseClient.auth.signUp({
+                email: email,
+                password: pass,
+            });
+
+            if (error) {
+                errorEl.textContent = error.message;
                 errorEl.classList.remove('hidden');
             } else {
-                accounts.push({ email, password: pass, reason, status: 'pending' });
-                localStorage.setItem('accounts', JSON.stringify(accounts));
-                localStorage.setItem('auth_status', 'pending');
-                localStorage.setItem('current_user', email);
-                updateUIState();
+                if (data.user) {
+                    await supabaseClient.from('profiles').insert([
+                        { id: data.user.id, email: email, reason: reason, status: 'pending' }
+                    ]);
+                }
+                errorEl.classList.add('hidden');
             }
+            btn.innerHTML = originalText;
+            btn.disabled = false;
         });
 
         // Navigation buttons in auth overlay
         btnShowRegister.addEventListener('click', (e) => { e.preventDefault(); showView(registerView); });
         btnShowLogin.addEventListener('click', (e) => { e.preventDefault(); showView(loginView); });
-        btnPendingBack.addEventListener('click', (e) => { 
+        btnPendingBack.addEventListener('click', async (e) => { 
             e.preventDefault(); 
-            localStorage.removeItem('auth_status'); 
-            localStorage.removeItem('current_user'); 
-            updateUIState(); 
+            await supabaseClient.auth.signOut();
         });
 
         // Logout
-        const logout = (e) => {
+        const logout = async (e) => {
             if(e) e.preventDefault();
-            localStorage.removeItem('auth_status');
-            localStorage.removeItem('current_user');
-            updateUIState();
+            await supabaseClient.auth.signOut();
         };
         if (btnLogoutSidebar) btnLogoutSidebar.addEventListener('click', logout);
         if (btnLogoutAdmin) btnLogoutAdmin.addEventListener('click', logout);
 
         // Admin view
         if (navAdmin) {
-            navAdmin.addEventListener('click', (e) => {
+            navAdmin.addEventListener('click', async (e) => {
                 e.preventDefault();
-                renderAdminRequests();
                 authOverlay.classList.remove('hidden');
                 setTimeout(() => {
                     authOverlay.classList.remove('opacity-0', 'pointer-events-none');
                     showView(adminView);
+                    renderAdminRequests();
                 }, 10);
             });
         }
 
         if (btnAdminContinue) {
-            btnAdminContinue.addEventListener('click', (e) => {
+            btnAdminContinue.addEventListener('click', async (e) => {
                 e.preventDefault();
-                updateUIState();
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                updateUIState(session);
             });
         }
 
-        const renderAdminRequests = () => {
+        const renderAdminRequests = async () => {
             const container = document.getElementById('admin-requests');
-            accounts = JSON.parse(localStorage.getItem('accounts')) || [];
-            const pending = accounts.filter(a => a.status === 'pending');
+            container.innerHTML = '<p class="text-xs font-mono opacity-60">Cargando solicitudes...</p>';
+
+            const { data: pending, error } = await supabaseClient
+                .from('profiles')
+                .select('*')
+                .eq('status', 'pending');
             
-            if (pending.length === 0) {
+            if (error) {
+                container.innerHTML = `<p class="text-xs text-red-500 font-mono">Error al cargar: ${error.message}</p>`;
+                return;
+            }
+
+            if (!pending || pending.length === 0) {
                 container.innerHTML = '<p class="text-xs font-mono opacity-60">No hay solicitudes pendientes.</p>';
                 return;
             }
@@ -160,29 +201,26 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p><strong>Usuario:</strong> ${user.email}</p>
                     <p class="mt-1 opacity-80"><strong>Motivo:</strong> ${user.reason}</p>
                     <div class="flex gap-2 mt-3">
-                        <button class="bg-success text-white px-3 py-1 hover:opacity-80 approve-btn border border-[var(--success)]" data-email="${user.email}" style="background-color: var(--success); border-color: var(--success); color: #fff;">Aprobar</button>
-                        <button class="bg-danger text-white px-3 py-1 hover:opacity-80 reject-btn border border-[var(--danger)]" data-email="${user.email}" style="background-color: var(--danger); border-color: var(--danger); color: #fff;">Rechazar</button>
+                        <button class="bg-success text-white px-3 py-1 hover:opacity-80 approve-btn border border-[var(--success)]" data-id="${user.id}" style="background-color: var(--success); border-color: var(--success); color: #fff;">Aprobar</button>
+                        <button class="bg-danger text-white px-3 py-1 hover:opacity-80 reject-btn border border-[var(--danger)]" data-id="${user.id}" style="background-color: var(--danger); border-color: var(--danger); color: #fff;">Rechazar</button>
                     </div>
                 </div>
             `).join('');
 
             container.querySelectorAll('.approve-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const email = e.target.getAttribute('data-email');
-                    const accIndex = accounts.findIndex(a => a.email === email);
-                    if(accIndex > -1) {
-                        accounts[accIndex].status = 'approved';
-                        localStorage.setItem('accounts', JSON.stringify(accounts));
-                        renderAdminRequests();
-                    }
+                btn.addEventListener('click', async (e) => {
+                    const id = e.target.getAttribute('data-id');
+                    e.target.innerText = "Procesando...";
+                    await supabaseClient.from('profiles').update({ status: 'approved' }).eq('id', id);
+                    renderAdminRequests();
                 });
             });
 
             container.querySelectorAll('.reject-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const email = e.target.getAttribute('data-email');
-                    accounts = accounts.filter(a => a.email !== email);
-                    localStorage.setItem('accounts', JSON.stringify(accounts));
+                btn.addEventListener('click', async (e) => {
+                    const id = e.target.getAttribute('data-id');
+                    e.target.innerText = "Procesando...";
+                    await supabaseClient.from('profiles').update({ status: 'rejected' }).eq('id', id);
                     renderAdminRequests();
                 });
             });
