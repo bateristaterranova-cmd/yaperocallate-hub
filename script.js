@@ -98,8 +98,13 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (error) {
-                errorEl.textContent = 'Credenciales incorrectas o cuenta no existe.';
-                errorEl.classList.remove('hidden');
+                if (error.message.includes('Email not confirmed')) {
+                    errorEl.classList.add('hidden');
+                    showView(pendingView);
+                } else {
+                    errorEl.textContent = 'Credenciales incorrectas o cuenta no existe.';
+                    errorEl.classList.remove('hidden');
+                }
             } else {
                 errorEl.classList.add('hidden');
                 // After successful login, check their profile status
@@ -128,6 +133,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const { data, error } = await supabaseClient.auth.signUp({
                 email: email,
                 password: pass,
+                options: {
+                    data: {
+                        reason: reason
+                    }
+                }
             });
 
             if (error) {
@@ -136,13 +146,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
             } else {
-                if (data.user) {
-                    await supabaseClient.from('profiles').insert([
-                        { id: data.user.id, email: email, reason: reason, status: 'pending' }
-                    ]);
-                }
                 errorEl.classList.add('hidden');
-                // Sign out the new user (they're pending) and show the pending screen
+                // El trigger de base de datos se encargará de crear el profile
                 await supabaseClient.auth.signOut();
                 showView(pendingView);
                 btn.innerHTML = originalText;
@@ -803,12 +808,4 @@ function getStatusVisuals(status) {
                 dotStyle: 'background: #64748b;'
             };
     }
-}
-
-function retryExecution(id) {
-    if (!API_KEY) {
-        alert(`Reintento de ejecución #${id} simulado (Falta API Key).`);
-        return;
-    }
-    alert(`Se ha enviado la petición para reintentar la ejecución: #${id}`);
 }
