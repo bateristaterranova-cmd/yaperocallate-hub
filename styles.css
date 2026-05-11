@@ -273,6 +273,11 @@ body {
     to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes pendingPulse {
+    0%, 100% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.05); }
+}
+
 #n8n-section .row-enter {
     animation: fadeIn 0.4s ease forwards;
 }

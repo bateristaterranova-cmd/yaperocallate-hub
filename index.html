@@ -108,12 +108,27 @@
 
             <!-- Vista Pendiente -->
             <div id="pending-view" class="hidden text-center py-8">
-                <i data-lucide="clock" class="w-16 h-16 mx-auto mb-6 opacity-80"></i>
-                <h2 class="text-3xl font-serif font-black uppercase mb-4">En Revisión</h2>
-                <p class="font-mono text-sm opacity-80 mb-8 leading-relaxed">
-                    Tu solicitud ha sido registrada.<br><br>El acceso a este HUB es restringido y requiere aprobación manual del administrador.
-                </p>
-                <button id="btn-pending-back" class="bg-[var(--bg)] text-[var(--fg)] font-bold uppercase font-mono py-3 px-6 text-xs hover:bg-gray-200 transition-colors">
+                <!-- Pulsing status indicator -->
+                <div class="relative mx-auto mb-6" style="width: 80px; height: 80px;">
+                    <div style="position: absolute; inset: 0; border-radius: 50%; border: 2px solid rgba(0,0,0,0.15); animation: pendingPulse 2s ease-in-out infinite;"></div>
+                    <div style="position: absolute; inset: 8px; border-radius: 50%; border: 2px solid rgba(0,0,0,0.25); animation: pendingPulse 2s ease-in-out infinite 0.3s;"></div>
+                    <div style="position: absolute; inset: 16px; border-radius: 50%; background: rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: center;">
+                        <i data-lucide="clock" class="w-10 h-10 opacity-70"></i>
+                    </div>
+                </div>
+
+                <h2 class="text-4xl font-serif font-black uppercase mb-2 tracking-tighter">En Revisión</h2>
+                <p class="font-mono text-xs opacity-60 mb-6 border-b border-[var(--bg)] pb-4">SYS.STATUS → PENDING</p>
+                
+                <div style="background: rgba(0,0,0,0.05); padding: 1rem; margin-bottom: 1.5rem; border-left: 3px solid rgba(0,0,0,0.3);">
+                    <p class="font-mono text-sm opacity-80 leading-relaxed text-left">
+                        Tu solicitud ha sido registrada correctamente.<br><br>
+                        El acceso a este HUB es <strong>restringido</strong> y requiere aprobación manual del administrador.<br><br>
+                        <span class="opacity-60" style="font-size: 0.7rem;">Vuelve a iniciar sesión más tarde para comprobar el estado.</span>
+                    </p>
+                </div>
+
+                <button id="btn-pending-back" class="w-full bg-[var(--bg)] text-[var(--fg)] font-bold uppercase font-mono py-3 px-6 text-sm hover:bg-gray-200 transition-colors">
                     Volver al login ↘
                 </button>
             </div>

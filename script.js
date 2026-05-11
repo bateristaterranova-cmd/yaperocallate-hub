@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.innerHTML = "Comprobando...";
             btn.disabled = true;
 
-            const { error } = await supabaseClient.auth.signInWithPassword({
+            const { data, error } = await supabaseClient.auth.signInWithPassword({
                 email: email,
                 password: pass,
             });
@@ -102,6 +102,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 errorEl.classList.remove('hidden');
             } else {
                 errorEl.classList.add('hidden');
+                // After successful login, check their profile status
+                // This handles the case where a pending user tries to log in
+                if (data.session) {
+                    await updateUIState(data.session);
+                }
             }
             btn.innerHTML = originalText;
             btn.disabled = false;
@@ -128,6 +133,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (error) {
                 errorEl.textContent = error.message;
                 errorEl.classList.remove('hidden');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
             } else {
                 if (data.user) {
                     await supabaseClient.from('profiles').insert([
@@ -135,9 +142,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     ]);
                 }
                 errorEl.classList.add('hidden');
+                // Sign out the new user (they're pending) and show the pending screen
+                await supabaseClient.auth.signOut();
+                showView(pendingView);
+                btn.innerHTML = originalText;
+                btn.disabled = false;
             }
-            btn.innerHTML = originalText;
-            btn.disabled = false;
         });
 
         // Navigation buttons in auth overlay
