@@ -57,17 +57,17 @@
                 <h1 class="text-5xl sm:text-6xl font-serif font-black uppercase mb-2 tracking-tighter leading-none">Acceso</h1>
                 <p class="mb-8 font-mono text-sm opacity-80 border-b border-[var(--bg)] pb-4">INDX.AUTH ↘</p>
 
-                <form id="login-form" class="space-y-5" onsubmit="return false">
+                <form id="login-form" class="space-y-5">
                     <div id="login-error" class="hidden bg-red-500/20 text-red-200 border border-red-500 p-3 text-xs font-mono mb-4"></div>
                     <div>
                         <label class="block font-mono text-xs font-bold uppercase mb-2">Usuario / Email</label>
-                        <input type="text" id="login-email" class="w-full bg-[var(--bg)] text-[var(--fg)] border-none p-3 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)] placeholder-gray-500" placeholder="admin" required>
+                        <input type="text" id="login-email" class="w-full bg-[var(--bg)] text-[var(--fg)] border-none p-3 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)] placeholder-gray-500" placeholder="admin">
                     </div>
                     <div>
                         <label class="block font-mono text-xs font-bold uppercase mb-2">Contraseña</label>
-                        <input type="password" id="login-password" class="w-full bg-[var(--bg)] text-[var(--fg)] border-none p-3 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)] placeholder-gray-500" placeholder="admin" required>
+                        <input type="password" id="login-password" class="w-full bg-[var(--bg)] text-[var(--fg)] border-none p-3 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)] placeholder-gray-500" placeholder="admin">
                     </div>
-                    <button type="submit" class="w-full bg-[var(--bg)] text-[var(--fg)] font-bold uppercase font-mono py-4 text-sm hover:bg-gray-200 transition-colors mt-2">
+                    <button type="button" id="btn-login-submit" class="w-full bg-[var(--bg)] text-[var(--fg)] font-bold uppercase font-mono py-4 text-sm hover:bg-gray-200 transition-colors mt-2">
                         Entrar ↘
                     </button>
                 </form>
@@ -82,21 +82,21 @@
                 <h1 class="text-5xl sm:text-6xl font-serif font-black uppercase mb-2 tracking-tighter leading-none">Registro</h1>
                 <p class="mb-8 font-mono text-sm opacity-80 border-b border-[var(--bg)] pb-4">REQ.AUTH ↘</p>
 
-                <form id="register-form" class="space-y-5" onsubmit="return false">
+                <form id="register-form" class="space-y-5">
                     <div id="register-error" class="hidden bg-red-500/20 text-red-200 border border-red-500 p-3 text-xs font-mono mb-4"></div>
                     <div>
                         <label class="block font-mono text-xs font-bold uppercase mb-2">Usuario / Email</label>
-                        <input type="text" id="register-email" class="w-full bg-[var(--bg)] text-[var(--fg)] border-none p-3 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]" required>
+                        <input type="text" id="register-email" class="w-full bg-[var(--bg)] text-[var(--fg)] border-none p-3 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]">
                     </div>
                     <div>
                         <label class="block font-mono text-xs font-bold uppercase mb-2">Contraseña</label>
-                        <input type="password" id="register-password" class="w-full bg-[var(--bg)] text-[var(--fg)] border-none p-3 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]" required>
+                        <input type="password" id="register-password" class="w-full bg-[var(--bg)] text-[var(--fg)] border-none p-3 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]">
                     </div>
                     <div>
                         <label class="block font-mono text-xs font-bold uppercase mb-2">Motivo de acceso</label>
-                        <textarea id="register-reason" class="w-full bg-[var(--bg)] text-[var(--fg)] border-none p-3 font-mono text-sm h-16 resize-none focus:outline-none focus:ring-2 focus:ring-[var(--primary)]" placeholder="¿Por qué necesitas entrar?" required></textarea>
+                        <textarea id="register-reason" class="w-full bg-[var(--bg)] text-[var(--fg)] border-none p-3 font-mono text-sm h-16 resize-none focus:outline-none focus:ring-2 focus:ring-[var(--primary)]" placeholder="¿Por qué necesitas entrar?"></textarea>
                     </div>
-                    <button type="submit" class="w-full bg-[var(--bg)] text-[var(--fg)] font-bold uppercase font-mono py-4 text-sm hover:bg-gray-200 transition-colors mt-2">
+                    <button type="button" id="btn-register-submit" class="w-full bg-[var(--bg)] text-[var(--fg)] font-bold uppercase font-mono py-4 text-sm hover:bg-gray-200 transition-colors mt-2">
                         Solicitar Acceso ↘
                     </button>
                 </form>

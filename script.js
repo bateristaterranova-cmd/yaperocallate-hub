@@ -81,15 +81,20 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Login logic
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
+        document.getElementById('btn-login-submit').addEventListener('click', async () => {
             const email = document.getElementById('login-email').value.trim();
             const pass = document.getElementById('login-password').value.trim();
             const errorEl = document.getElementById('login-error');
+
+            if (!email || !pass) {
+                errorEl.textContent = 'Por favor, completa todos los campos.';
+                errorEl.classList.remove('hidden');
+                return;
+            }
             
-            const btn = loginForm.querySelector('button[type=\"submit\"]');
+            const btn = document.getElementById('btn-login-submit');
             const originalText = btn.innerHTML;
-            btn.innerHTML = \"Comprobando...\";
+            btn.innerHTML = "Comprobando...";
             btn.disabled = true;
 
             const { data, error } = await supabaseClient.auth.signInWithPassword({
@@ -107,8 +112,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } else {
                 errorEl.classList.add('hidden');
-                // After successful login, check their profile status
-                // This handles the case where a pending user tries to log in
                 if (data.session) {
                     await updateUIState(data.session);
                 }
@@ -118,25 +121,28 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Register logic
-        registerForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
+        document.getElementById('btn-register-submit').addEventListener('click', async () => {
             const email = document.getElementById('register-email').value.trim();
             const pass = document.getElementById('register-password').value.trim();
             const reason = document.getElementById('register-reason').value.trim();
             const errorEl = document.getElementById('register-error');
+
+            if (!email || !pass || !reason) {
+                errorEl.textContent = 'Por favor, completa todos los campos.';
+                errorEl.classList.remove('hidden');
+                return;
+            }
             
-            const btn = registerForm.querySelector('button[type=\"submit\"]');
+            const btn = document.getElementById('btn-register-submit');
             const originalText = btn.innerHTML;
-            btn.innerHTML = \"Enviando solicitud...\";
+            btn.innerHTML = "Enviando solicitud...";
             btn.disabled = true;
 
             const { data, error } = await supabaseClient.auth.signUp({
                 email: email,
                 password: pass,
                 options: {
-                    data: {
-                        reason: reason
-                    }
+                    data: { reason: reason }
                 }
             });
 
