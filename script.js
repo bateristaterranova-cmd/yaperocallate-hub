@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 .single();
 
             if (error || !profile) {
-                console.error(\"Error fetching profile\", error);
+                console.error("Error fetching profile", error);
                 // If no profile, they might have just registered or something went wrong. Assume pending.
                 authOverlay.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
                 showView(pendingView);
@@ -200,7 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const renderAdminRequests = async () => {
             const container = document.getElementById('admin-requests');
-            container.innerHTML = '<p class=\"text-xs font-mono opacity-60\">Cargando solicitudes...</p>';
+            container.innerHTML = '<p class="text-xs font-mono opacity-60">Cargando solicitudes...</p>';
 
             const { data: pending, error } = await supabaseClient
                 .from('profiles')
@@ -208,30 +208,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 .eq('status', 'pending');
             
             if (error) {
-                container.innerHTML = `<p class=\"text-xs text-red-500 font-mono\">Error al cargar: ${error.message}</p>`;
+                container.innerHTML = '<p class="text-xs text-red-500 font-mono">Error al cargar: ' + error.message + '</p>';
                 return;
             }
 
             if (!pending || pending.length === 0) {
-                container.innerHTML = '<p class=\"text-xs font-mono opacity-60\">No hay solicitudes pendientes.</p>';
+                container.innerHTML = '<p class="text-xs font-mono opacity-60">No hay solicitudes pendientes.</p>';
                 return;
             }
 
-            container.innerHTML = pending.map(user => `
-                <div class=\"border border-[var(--fg)] p-3 bg-black/5 text-xs font-mono mb-2\">
-                    <p><strong>Usuario:</strong> \${user.email}</p>
-                    <p class=\"mt-1 opacity-80\"><strong>Motivo:</strong> \${user.reason}</p>
-                    <div class=\"flex gap-2 mt-3\">
-                        <button class=\"bg-success text-white px-3 py-1 hover:opacity-80 approve-btn border border-[var(--success)]\" data-id=\"\${user.id}\" style=\"background-color: var(--success); border-color: var(--success); color: #fff;\">Aprobar</button>
-                        <button class=\"bg-danger text-white px-3 py-1 hover:opacity-80 reject-btn border border-[var(--danger)]\" data-id=\"\${user.id}\" style=\"background-color: var(--danger); border-color: var(--danger); color: #fff;\">Rechazar</button>
-                    </div>
-                </div>
-            `).join('');
+            container.innerHTML = pending.map(user => 
+                '<div class="border border-[var(--fg)] p-3 bg-black/5 text-xs font-mono mb-2">' +
+                    '<p><strong>Usuario:</strong> ' + user.email + '</p>' +
+                    '<p class="mt-1 opacity-80"><strong>Motivo:</strong> ' + user.reason + '</p>' +
+                    '<div class="flex gap-2 mt-3">' +
+                        '<button class="approve-btn px-3 py-1 hover:opacity-80 border" data-id="' + user.id + '" style="background-color: #10b981; border-color: #10b981; color: #fff;">Aprobar</button>' +
+                        '<button class="reject-btn px-3 py-1 hover:opacity-80 border" data-id="' + user.id + '" style="background-color: #ef4444; border-color: #ef4444; color: #fff;">Rechazar</button>' +
+                    '</div>' +
+                '</div>'
+            ).join('');
 
             container.querySelectorAll('.approve-btn').forEach(btn => {
                 btn.addEventListener('click', async (e) => {
                     const id = e.target.getAttribute('data-id');
-                    e.target.innerText = \"Procesando...\";
+                    e.target.innerText = "Procesando...";
                     await supabaseClient.from('profiles').update({ status: 'approved' }).eq('id', id);
                     renderAdminRequests();
                 });
@@ -240,7 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
             container.querySelectorAll('.reject-btn').forEach(btn => {
                 btn.addEventListener('click', async (e) => {
                     const id = e.target.getAttribute('data-id');
-                    e.target.innerText = \"Procesando...\";
+                    e.target.innerText = "Procesando...";
                     await supabaseClient.from('profiles').update({ status: 'rejected' }).eq('id', id);
                     renderAdminRequests();
                 });
@@ -282,7 +282,7 @@ document.addEventListener('DOMContentLoaded', () => {
         mainView.style.display = 'block';
     });
 
-    // Imgenes de placeholder abstractas y con vibratividad para contraste al hacer hover
+    // Imágenes de placeholder abstractas y con vibratividad para contraste al hacer hover
     const items = [
         { title: 'N 8 N', img: 'n8n_logo.svg', link: '#n8n', id: 'card-n8n' },
         { title: 'C O O L I F Y', img: 'https://images.unsplash.com/photo-1620288627223-53302f4e8c74?q=80&w=600&h=450&fit=crop', link: 'https://control.yaperocallate.com' },
@@ -294,12 +294,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     items.forEach(item => {
         const isExternal = item.link && item.link.startsWith('http');
-        const itemHTML = `
-            <a href=\"\${item.link || '#'}\" \${isExternal ? 'target=\"_blank\"' : ''} class=\"grid-item block\" \${item.id ? \`id=\"\${item.id}\"\` : ''} style=\"text-decoration: none;\">
-                <img src=\"\${item.img}\" alt=\"\${item.title}\" loading=\"lazy\" \${item.img.includes('svg') || item.img.includes('png') ? 'style=\"background: #050505; padding: 2rem; box-sizing: border-box; object-fit: contain;\"' : ''}>
-                <div class=\"badge\">\${item.title}</div>
-            </a>
-        `;
+        const imgStyle = (item.img.includes('svg') || item.img.includes('png')) 
+            ? ' style="background: #050505; padding: 2rem; box-sizing: border-box; object-fit: contain;"' 
+            : '';
+        const itemHTML = 
+            '<a href="' + (item.link || '#') + '" ' + (isExternal ? 'target="_blank"' : '') + ' class="grid-item block" ' + (item.id ? 'id="' + item.id + '"' : '') + ' style="text-decoration: none;">' +
+                '<img src="' + item.img + '" alt="' + item.title + '" loading="lazy"' + imgStyle + '>' +
+                '<div class="badge">' + item.title + '</div>' +
+            '</a>';
         grid.insertAdjacentHTML('beforeend', itemHTML);
     });
 
@@ -411,13 +413,13 @@ function setupTabs() {
         btn.addEventListener('click', () => {
             tabButtons.forEach(b => {
                 b.classList.remove('active-tab', 'border-primary', 'text-primary');
-                b.style.borderBottom = \"none\";
-                b.style.color = \"#94a3b8\";
+                b.style.borderBottom = "none";
+                b.style.color = "#94a3b8";
             });
             
             btn.classList.add('active-tab', 'border-primary', 'text-primary');
-            btn.style.borderBottom = \"2px solid #3b82f6\";
-            btn.style.color = \"#3b82f6\";
+            btn.style.borderBottom = "2px solid #3b82f6";
+            btn.style.color = "#3b82f6";
 
             tabContents.forEach(content => {
                 content.classList.remove('active');
@@ -446,7 +448,7 @@ function setupSearch() {
 async function fetchWorkflows() {
     if (!API_KEY) return;
     try {
-        const response = await fetch(\`\${N8N_BASE_URL}/api/v1/workflows?limit=250\`, {
+        const response = await fetch(N8N_BASE_URL + '/api/v1/workflows?limit=250', {
             method: 'GET',
             headers: {
                 'accept': 'application/json',
@@ -476,13 +478,13 @@ function generateDynamicCategoryFilters(prefixes) {
     const categoryContainer = document.getElementById('categoryFilters');
     if (!categoryContainer) return;
 
-    let html = \`<button class=\"px-3 py-1.5 rounded-full text-xs font-medium border border-primary/50 bg-primary/20 text-primary transition-colors hover:bg-primary/30 active-category\" data-category=\"all\" style=\"border: 1px solid rgba(59, 130, 246, 0.5); background: rgba(59, 130, 246, 0.2); color: #3b82f6;\">Todos</button>\`;
+    let html = '<button class="px-3 py-1.5 rounded-full text-xs font-medium border border-primary/50 bg-primary/20 text-primary transition-colors hover:bg-primary/30 active-category" data-category="all" style="border: 1px solid rgba(59, 130, 246, 0.5); background: rgba(59, 130, 246, 0.2); color: #3b82f6;">Todos</button>';
 
     prefixes.sort().forEach(prefix => {
-        html += \`<button class=\"px-3 py-1.5 rounded-full text-xs font-medium border border-slate-700 bg-slate-800 text-slate-300 transition-colors hover:bg-slate-700 hover:text-white\" data-category=\"\${prefix}\" style=\"border: 1px solid #334155; background: #1e293b; color: #cbd5e1;\">\${prefix}</button>\`;
+        html += '<button class="px-3 py-1.5 rounded-full text-xs font-medium border border-slate-700 bg-slate-800 text-slate-300 transition-colors hover:bg-slate-700 hover:text-white" data-category="' + prefix + '" style="border: 1px solid #334155; background: #1e293b; color: #cbd5e1;">' + prefix + '</button>';
     });
 
-    html += \`<button class=\"px-3 py-1.5 rounded-full text-xs font-medium border border-danger/50 bg-danger/10 text-danger transition-colors hover:bg-danger/20 ml-auto\" data-category=\"failed_only\" style=\"border: 1px solid rgba(239, 68, 68, 0.5); background: rgba(239, 68, 68, 0.1); color: #ef4444;\"><i data-lucide=\"x-circle\" class=\"w-3 h-3 inline mr-1\"></i>Ver Fallidos</button>\`;
+    html += '<button class="px-3 py-1.5 rounded-full text-xs font-medium border border-danger/50 bg-danger/10 text-danger transition-colors hover:bg-danger/20 ml-auto" data-category="failed_only" style="border: 1px solid rgba(239, 68, 68, 0.5); background: rgba(239, 68, 68, 0.1); color: #ef4444;"><i data-lucide="x-circle" class="w-3 h-3 inline mr-1"></i>Ver Fallidos</button>';
 
     categoryContainer.innerHTML = html;
     setupCategoryFilters();
@@ -491,19 +493,19 @@ function generateDynamicCategoryFilters(prefixes) {
 
 async function fetchExecutions() {
     if (!API_KEY) {
-        loadingState.innerHTML = '<div class=\"text-danger flex items-center gap-2\" style=\"color: #ef4444;\"><i data-lucide=\"alert-triangle\"></i> Falta API_KEY de n8n</div>';
+        loadingState.innerHTML = '<div class="text-danger flex items-center gap-2" style="color: #ef4444;"><i data-lucide="alert-triangle"></i> Falta API_KEY de n8n</div>';
         lucide.createIcons();
         return;
     }
     try {
-        const response = await fetch(\`\${N8N_BASE_URL}/api/v1/executions?limit=50\`, {
+        const response = await fetch(N8N_BASE_URL + '/api/v1/executions?limit=50', {
             method: 'GET',
             headers: {
                 'accept': 'application/json',
                 'X-N8N-API-KEY': API_KEY
             }
         });
-        if (!response.ok) throw new Error(\`Error: \${response.status}\`);
+        if (!response.ok) throw new Error('Error: ' + response.status);
         const data = await response.json();
         if (data && data.data) {
             allExecutions = data.data;
@@ -511,17 +513,17 @@ async function fetchExecutions() {
         }
     } catch (error) {
         console.error('Error obteniendo ejecuciones de n8n:', error);
-        loadingState.innerHTML = \`<div class=\"text-danger flex flex-col items-center gap-2\" style=\"color: #ef4444;\"><i data-lucide=\"alert-triangle\" class=\"w-8 h-8\"></i><span class=\"font-bold\">Error de conexión con n8n</span><span class=\"text-xs text-slate-400\">Verifica que n8n tenga CORS habilitado y la API Key sea correcta.</span></div>\`;
+        loadingState.innerHTML = '<div class="text-danger flex flex-col items-center gap-2" style="color: #ef4444;"><i data-lucide="alert-triangle" class="w-8 h-8"></i><span class="font-bold">Error de conexión con n8n</span><span class="text-xs text-slate-400">Verifica que n8n tenga CORS habilitado y la API Key sea correcta.</span></div>';
         lucide.createIcons();
     }
 }
 
 function applyFiltersAndRender() {
     filteredExecutions = allExecutions.filter(exec => {
-        const flowName = workflowDictionary[exec.workflowId] || exec.workflowData?.name || 'Workflow Desconocido';
+        const flowName = workflowDictionary[exec.workflowId] || (exec.workflowData ? exec.workflowData.name : null) || 'Workflow Desconocido';
         const idMatch = String(exec.id).includes(currentSearchTerm);
         const nameMatch = flowName.toLowerCase().includes(currentSearchTerm) || '';
-        const statusMatch = exec.status?.toLowerCase().includes(currentSearchTerm) || '';
+        const statusMatch = (exec.status ? exec.status.toLowerCase().includes(currentSearchTerm) : false) || '';
         
         const matchesSearch = currentSearchTerm === '' || idMatch || nameMatch || statusMatch;
         
@@ -551,7 +553,7 @@ function applyFiltersAndRender() {
         }
     }
     
-    const currentSearchCategory = \`\${currentSearchTerm}-\${currentCategory}\`;
+    const currentSearchCategory = currentSearchTerm + '-' + currentCategory;
     if (lastSearchHash !== currentSearchCategory) {
         hasChanges = true;
         lastSearchHash = currentSearchCategory;
@@ -559,7 +561,7 @@ function applyFiltersAndRender() {
 
     if (!hasChanges && !isFirstLoad) return; 
 
-    lastFilteredExecutions = [...filteredExecutions];
+    lastFilteredExecutions = filteredExecutions.slice();
     updateKPIs();
     renderTables();
     renderCharts();
@@ -579,9 +581,9 @@ function updateKPIs() {
     const kpiRunningIconBox = kpiRunning.parentElement.nextElementSibling;
     if (kpiRunningIconBox) {
         if (running === 0) {
-            kpiRunningIconBox.innerHTML = '<i data-lucide=\"check\" class=\"text-success w-6 h-6\" style=\"color: #10b981;\"></i>';
+            kpiRunningIconBox.innerHTML = '<i data-lucide="check" class="text-success w-6 h-6" style="color: #10b981;"></i>';
         } else {
-            kpiRunningIconBox.innerHTML = '<i data-lucide=\"loader-2\" class=\"text-warning w-6 h-6 animate-spin-slow\" style=\"color: #f59e0b;\"></i>';
+            kpiRunningIconBox.innerHTML = '<i data-lucide="loader-2" class="text-warning w-6 h-6 animate-spin-slow" style="color: #f59e0b;"></i>';
         }
         lucide.createIcons({root: kpiRunningIconBox.parentElement});
     }
@@ -620,50 +622,61 @@ function renderTables() {
             const formattedDate = !isNaN(date) ? date.toLocaleString() : 'N/A';
             const statusVisuals = getStatusVisuals(exec.status);
             
-            const flowName = workflowDictionary[exec.workflowId] || exec.workflowData?.name || 'Workflow Desconocido';
+            const flowName = workflowDictionary[exec.workflowId] || (exec.workflowData ? exec.workflowData.name : null) || 'Workflow Desconocido';
             const execId = exec.id || 'N/A';
 
             let errorMessageHtml = '';
             if (exec.status === 'error' || exec.status === 'failed' || exec.status === 'crashed') {
-                const errorMsg = exec.data?.resultData?.error?.message || exec.data?.error?.message || exec.error?.message || exec.resultData?.error?.message || 'Error en ejecución.';
-                errorMessageHtml = \`<div class=\"text-xs text-danger mt-1 font-mono break-words opacity-80\" style=\"color: #ef4444;\"><i data-lucide=\"alert-triangle\" class=\"w-3 h-3 inline mr-1\"></i>\${errorMsg}</div>\`;
+                let errorMsg = 'Error en ejecución.';
+                if (exec.data && exec.data.resultData && exec.data.resultData.error && exec.data.resultData.error.message) {
+                    errorMsg = exec.data.resultData.error.message;
+                } else if (exec.data && exec.data.error && exec.data.error.message) {
+                    errorMsg = exec.data.error.message;
+                } else if (exec.error && exec.error.message) {
+                    errorMsg = exec.error.message;
+                } else if (exec.resultData && exec.resultData.error && exec.resultData.error.message) {
+                    errorMsg = exec.resultData.error.message;
+                }
+                errorMessageHtml = '<div class="text-xs text-danger mt-1 font-mono break-words opacity-80" style="color: #ef4444;"><i data-lucide="alert-triangle" class="w-3 h-3 inline mr-1"></i>' + errorMsg + '</div>';
             }
 
-            const retryBtnHTML = (exec.status === 'error' || exec.status === 'crashed' || exec.status === 'failed') 
-                ? \`<button onclick=\"retryExecution('\${execId}')\" class=\"px-3 py-1.5 bg-danger/10 text-danger hover:bg-danger/20 rounded-lg text-xs font-medium transition-colors border border-danger/20 flex items-center gap-1 ml-auto\" style=\"border: 1px solid rgba(239, 68, 68, 0.2); background: rgba(239, 68, 68, 0.1); color: #ef4444;\">
-                     <i data-lucide=\"refresh-cw\" class=\"w-3 h-3\"></i> Reintentar
-                   </button>\`
-                : \`<span class=\"text-slate-500 text-xs px-3 py-1.5 block text-right\" style=\"color: #64748b;\">-</span>\`;
+            let retryBtnHTML;
+            if (exec.status === 'error' || exec.status === 'crashed' || exec.status === 'failed') {
+                retryBtnHTML = '<button onclick="retryExecution(\'' + execId + '\')" class="px-3 py-1.5 bg-danger/10 text-danger hover:bg-danger/20 rounded-lg text-xs font-medium transition-colors border border-danger/20 flex items-center gap-1 ml-auto" style="border: 1px solid rgba(239, 68, 68, 0.2); background: rgba(239, 68, 68, 0.1); color: #ef4444;"><i data-lucide="refresh-cw" class="w-3 h-3"></i> Reintentar</button>';
+            } else {
+                retryBtnHTML = '<span class="text-slate-500 text-xs px-3 py-1.5 block text-right" style="color: #64748b;">-</span>';
+            }
 
             const animationClass = isFirstLoad ? 'row-enter' : '';
-            const animationStyle = isFirstLoad ? \`style=\"animation-delay: \${index * 0.05}s; border-bottom: 1px solid hsl(0 0% 20%);\"\` : \`style=\"border-bottom: 1px solid hsl(0 0% 20%);\"\`;
-            const executionLink = \`https://n8n.yaperocallate.com/workflow/\${exec.workflowId}/executions/\${execId}\`;
+            const animationStyle = isFirstLoad 
+                ? 'style="animation-delay: ' + (index * 0.05) + 's; border-bottom: 1px solid hsl(0 0% 20%);"' 
+                : 'style="border-bottom: 1px solid hsl(0 0% 20%);"';
+            const executionLink = 'https://n8n.yaperocallate.com/workflow/' + exec.workflowId + '/executions/' + execId;
 
-            const row = \`
-                <tr class=\"hover:bg-slate-800/50 transition-colors group \${animationClass}\" \${animationStyle}>
-                    <td class=\"p-4 font-mono text-xs text-slate-400\" style=\"padding: 1rem; color: #94a3b8;\">
-                        <a href=\"\${executionLink}\" target=\"_blank\" class=\"hover:text-primary transition-colors hover:underline decoration-slate-600 underline-offset-4\" style=\"color: #3b82f6;\">#\${execId}</a>
-                    </td>
-                    <td class=\"p-4 font-medium text-slate-200\" style=\"padding: 1rem; color: #e2e8f0;\">
-                        <div class=\"flex flex-col\">
-                            <div class=\"flex items-center gap-2\">
-                               <div class=\"w-2 h-2 min-w-[8px] rounded-full \${statusVisuals.dotClass}\" style=\"width: 8px; height: 8px; border-radius: 50%; \${statusVisuals.dotStyle}\"></div>
-                               \${flowName}
-                            </div>
-                            \${errorMessageHtml}
-                        </div>
-                    </td>
-                    <td class=\"p-4 text-slate-400 text-sm whitespace-nowrap\" style=\"padding: 1rem; color: #94a3b8;\">\${formattedDate}</td>
-                    <td class=\"p-4\" style=\"padding: 1rem;\">
-                        <span class=\"px-2.5 py-1 rounded-full text-xs font-medium border \${statusVisuals.badgeClass}\" style=\"padding: 0.25rem 0.625rem; border-radius: 9999px; \${statusVisuals.badgeStyle}\">
-                            \${statusVisuals.label}
-                        </span>
-                    </td>
-                    <td class=\"p-4\" style=\"padding: 1rem;\">
-                        \${retryBtnHTML}
-                    </td>
-                </tr>
-            \`;
+            const row = 
+                '<tr class="hover:bg-slate-800/50 transition-colors group ' + animationClass + '" ' + animationStyle + '>' +
+                    '<td class="p-4 font-mono text-xs text-slate-400" style="padding: 1rem; color: #94a3b8;">' +
+                        '<a href="' + executionLink + '" target="_blank" class="hover:text-primary transition-colors hover:underline decoration-slate-600 underline-offset-4" style="color: #3b82f6;">#' + execId + '</a>' +
+                    '</td>' +
+                    '<td class="p-4 font-medium text-slate-200" style="padding: 1rem; color: #e2e8f0;">' +
+                        '<div class="flex flex-col">' +
+                            '<div class="flex items-center gap-2">' +
+                               '<div class="w-2 h-2 min-w-[8px] rounded-full ' + statusVisuals.dotClass + '" style="width: 8px; height: 8px; border-radius: 50%; ' + statusVisuals.dotStyle + '"></div>' +
+                               flowName +
+                            '</div>' +
+                            errorMessageHtml +
+                        '</div>' +
+                    '</td>' +
+                    '<td class="p-4 text-slate-400 text-sm whitespace-nowrap" style="padding: 1rem; color: #94a3b8;">' + formattedDate + '</td>' +
+                    '<td class="p-4" style="padding: 1rem;">' +
+                        '<span class="px-2.5 py-1 rounded-full text-xs font-medium border ' + statusVisuals.badgeClass + '" style="padding: 0.25rem 0.625rem; border-radius: 9999px; ' + statusVisuals.badgeStyle + '">' +
+                            statusVisuals.label +
+                        '</span>' +
+                    '</td>' +
+                    '<td class="p-4" style="padding: 1rem;">' +
+                        retryBtnHTML +
+                    '</td>' +
+                '</tr>';
             
             tableHTML += row;
 
@@ -814,4 +827,12 @@ function getStatusVisuals(status) {
                 dotStyle: 'background: #64748b;'
             };
     }
+}
+
+function retryExecution(id) {
+    if (!API_KEY) {
+        alert('Reintento de ejecución #' + id + ' simulado (Falta API Key).');
+        return;
+    }
+    alert('Se ha enviado la petición para reintentar la ejecución: #' + id);
 }
